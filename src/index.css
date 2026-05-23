@@ -1,0 +1,394 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Aura floating-points button ─────────────────────────────────────────── */
+.aura-btn {
+  cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  background: radial-gradient(65.28% 65.28% at 50% 100%, rgba(34, 211, 238, 0.8) 0%, rgba(34, 211, 238, 0) 100%),
+    linear-gradient(0deg, #2563eb, #2563eb);
+  border-radius: 0.75rem;
+  border: none;
+  outline: none;
+  padding: 12px 18px;
+  min-height: 48px;
+  min-width: 160px;
+  text-decoration: none;
+}
+
+.aura-btn::before,
+.aura-btn::after {
+  content: "";
+  position: absolute;
+  transition: all 0.5s ease-in-out;
+  z-index: 0;
+}
+
+.aura-btn::before {
+  inset: 1px;
+  background: linear-gradient(177.95deg, rgba(255, 255, 255, 0.19) 0%, rgba(255, 255, 255, 0) 100%);
+  border-radius: calc(0.75rem - 1px);
+}
+
+.aura-btn::after {
+  inset: 2px;
+  background: radial-gradient(65.28% 65.28% at 50% 100%, rgba(34, 211, 238, 0.8) 0%, rgba(34, 211, 238, 0) 100%),
+    linear-gradient(0deg, #2563eb, #2563eb);
+  border-radius: calc(0.75rem - 2px);
+}
+
+.aura-btn:active {
+  transform: scale(0.95);
+}
+
+.aura-btn-points {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.aura-point {
+  bottom: -10px;
+  position: absolute;
+  animation: aura-float infinite ease-in-out;
+  pointer-events: none;
+  width: 2px;
+  height: 2px;
+  background-color: #fff;
+  border-radius: 9999px;
+}
+
+@keyframes aura-float {
+  0% { transform: translateY(0); }
+  85% { opacity: 0; }
+  100% { transform: translateY(-55px); opacity: 0; }
+}
+
+.aura-btn-inner {
+  z-index: 2;
+  gap: 6px;
+  position: relative;
+  width: 100%;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  transition: color 0.2s ease-in-out;
+}
+
+.aura-btn-icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s ease;
+  stroke: white;
+  fill: none;
+}
+
+.aura-btn:hover .aura-btn-icon {
+  transform: translateX(2px);
+}
+
+/* ── Feature glassmorphism cards ─────────────────────────────────────────── */
+.feature-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%) !important;
+  box-shadow: 0 1px 0 0 rgba(255,255,255,0.06) inset, 0 4px 24px rgba(0,0,0,0.3);
+}
+
+.feature-card:hover {
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.10) inset,
+    0 8px 40px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(255,255,255,0.08);
+}
+
+/* ── CTA glassmorphism card ───────────────────────────────────────────────── */
+.cta-card {
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.08) inset,
+    0 32px 80px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(255,255,255,0.04);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   DASHBOARD GLASS CARDS — Aura Build aesthetic
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Base glass card (dark mode) ─────────────────────────────────────────── */
+.glass-card-dark {
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid rgba(255,255,255,0.09);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.07) inset,
+    0 4px 24px rgba(0,0,0,0.35),
+    0 1px 2px rgba(0,0,0,0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-card-dark:hover {
+  border-color: rgba(255,255,255,0.16);
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.10) inset,
+    0 12px 40px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(255,255,255,0.06);
+  transform: translateY(-6px);
+}
+
+/* Top shimmer line */
+.glass-card-dark::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+/* ── Hover glow orb ──────────────────────────────────────────────────────── */
+.glass-card-glow {
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  width: 120px;
+  height: 120px;
+  border-radius: 9999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  filter: blur(32px);
+}
+
+.glass-card-dark:hover .glass-card-glow {
+  opacity: 1;
+}
+
+/* ── Base glass card (light mode) ────────────────────────────────────────── */
+.glass-card-light {
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(148,163,184,0.22);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,1) inset,
+    0 4px 20px rgba(15,23,42,0.06),
+    0 1px 3px rgba(15,23,42,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-card-light:hover {
+  border-color: rgba(14,165,233,0.25);
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,1) inset,
+    0 12px 40px rgba(15,23,42,0.10),
+    0 0 0 1px rgba(14,165,233,0.12);
+  transform: translateY(-6px);
+}
+
+.glass-card-light::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+.glass-card-light:hover .glass-card-glow {
+  opacity: 0.6;
+}
+
+/* ── Kanban column glass ─────────────────────────────────────────────────── */
+.glass-kanban-dark {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-kanban-light {
+  background: rgba(255,255,255,0.65);
+  border: 1px solid rgba(148,163,184,0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(15,23,42,0.05);
+}
+
+/* ── Card appear animation ───────────────────────────────────────────────── */
+@keyframes card-appear {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.glass-card-dark,
+.glass-card-light {
+  animation: card-appear 0.35s ease both;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   LANDING PAGE BASE (dark is default — the page is always dark without the
+   .landing-light modifier class)
+   ══════════════════════════════════════════════════════════════════════════════ */
+.landing-page {
+  background-color: #080c14;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   LIGHT MODE OVERRIDES
+   Applied when .landing-light is present on the root landing div.
+   Every rule here is scoped so the dark version is never touched.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Page background */
+.landing-light {
+  background-color: #f8fafc !important;
+}
+
+/* Sections that had bg-[#080c14] */
+.landing-light section {
+  background-color: #f8fafc !important;
+}
+
+/* ── Ambient glows: softer, tinted for light bg ─────────────────────────── */
+.landing-light .hero-glow-1 { opacity: 0.12 !important; }
+.landing-light .hero-glow-2 { opacity: 0.06 !important; }
+
+/* ── Editor preview shell ────────────────────────────────────────────────── */
+.landing-light .editor-shell {
+  background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(248,250,252,0.8)) !important;
+  border-color: rgba(148,163,184,0.3) !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 60px rgba(15,23,42,0.08), 0 1px 0 0 rgba(255,255,255,0.8) inset !important;
+}
+
+/* Topbar & panel borders */
+.landing-light .editor-shell .border-white\/10,
+.landing-light .editor-shell [class*='border-white/10'] {
+  border-color: rgba(148,163,184,0.25) !important;
+}
+
+/* Panel backgrounds */
+.landing-light .editor-shell aside {
+  background-color: rgba(241,245,249,0.7) !important;
+}
+.landing-light .editor-shell main {
+  background-color: rgba(248,250,252,0.6) !important;
+}
+
+/* bg-white/5 → light tinted */
+.landing-light .editor-shell .bg-white\/5 { background-color: rgba(15,23,42,0.04) !important; }
+.landing-light .editor-shell .bg-black\/30 { background-color: rgba(241,245,249,0.8) !important; }
+.landing-light .editor-shell .bg-black\/20 { background-color: rgba(248,250,252,0.6) !important; }
+.landing-light .editor-shell .bg-black\/40 { background-color: rgba(226,232,240,0.8) !important; }
+
+/* Text colours inside editor */
+.landing-light .editor-shell .text-slate-300 { color: #334155 !important; }
+.landing-light .editor-shell .text-slate-400 { color: #64748b !important; }
+.landing-light .editor-shell .text-slate-500 { color: #94a3b8 !important; }
+.landing-light .editor-shell .text-white     { color: #0f172a !important; }
+
+/* Card titles inside preview */
+.landing-light .editor-shell p.text-sm.font-semibold { color: #0f172a !important; }
+
+/* ── Hero badge pill ─────────────────────────────────────────────────────── */
+.landing-light .hero-badge {
+  border-color: rgba(14,165,233,0.25) !important;
+  background-color: rgba(14,165,233,0.06) !important;
+  color: #0369a1 !important;
+}
+
+/* ── Hero headline & body ────────────────────────────────────────────────── */
+.landing-light .hero-headline { color: #0f172a !important; }
+.landing-light .hero-body     { color: #475569 !important; }
+.landing-light .hero-social   { color: #64748b !important; }
+
+/* ── Login ghost button (light variant) ─────────────────────────────────── */
+.landing-light .ghost-btn-light {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(241,245,249,0.8) 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(148,163,184,0.4), 0 2px 8px rgba(15,23,42,0.06) !important;
+  color: #334155 !important;
+}
+.landing-light .ghost-btn-light:hover { color: #0f172a !important; }
+
+/* ── Features section ────────────────────────────────────────────────────── */
+.landing-light .features-badge {
+  border-color: rgba(14,165,233,0.2) !important;
+  background-color: rgba(14,165,233,0.05) !important;
+  color: #0369a1 !important;
+}
+.landing-light .features-headline { color: #0f172a !important; }
+.landing-light .features-body     { color: #64748b !important; }
+
+/* Feature cards — glass on light */
+.landing-light .feature-card {
+  background: rgba(255,255,255,0.75) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,1) inset, 0 4px 24px rgba(15,23,42,0.06), 0 0 0 1px rgba(148,163,184,0.15) !important;
+  backdrop-filter: blur(20px) !important;
+}
+.landing-light .feature-card:hover {
+  background: rgba(255,255,255,0.92) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,1) inset, 0 12px 40px rgba(15,23,42,0.10), 0 0 0 1px rgba(148,163,184,0.25) !important;
+}
+.landing-light .feature-card h3 { color: #0f172a !important; }
+.landing-light .feature-card p  { color: #64748b !important; }
+.landing-light .feature-card:hover p { color: #334155 !important; }
+
+/* Feature card shimmer line (top) */
+.landing-light .feature-card .via-white\/20 { --tw-gradient-via: rgba(0,0,0,0.06) !important; }
+
+/* ── CTA card ────────────────────────────────────────────────────────────── */
+.landing-light .cta-card {
+  border-color: rgba(148,163,184,0.2) !important;
+  backdrop-filter: blur(20px) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 32px 80px rgba(15,23,42,0.08), 0 0 0 1px rgba(148,163,184,0.12) !important;
+}
+.landing-light .cta-card .absolute.inset-0:first-child {
+  background: linear-gradient(to bottom, rgba(255,255,255,0.85), rgba(248,250,252,0.7)) !important;
+}
+.landing-light .cta-card .text-white   { color: #0f172a !important; }
+.landing-light .cta-card .text-slate-400 { color: #64748b !important; }
+.landing-light .cta-card .text-slate-500 { color: #94a3b8 !important; }
+.landing-light .cta-card .via-sky-400\/60 { --tw-gradient-via: rgba(14,165,233,0.4) !important; }
+/* glow orbs: very subtle on light */
+.landing-light .cta-card .opacity-25 { opacity: 0.07 !important; }
+.landing-light .cta-card .opacity-20 { opacity: 0.05 !important; }
+.landing-light .cta-card .opacity-10 { opacity: 0.04 !important; }
+
+/* CTA secondary button light */
+.landing-light .cta-secondary-btn {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(241,245,249,0.8)) !important;
+  box-shadow: inset 0 0 0 1px rgba(148,163,184,0.35), 0 2px 8px rgba(15,23,42,0.05) !important;
+  color: #475569 !important;
+}
+.landing-light .cta-secondary-btn:hover { color: #0f172a !important; }
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.landing-light footer {
+  background-color: #f1f5f9 !important;
+  border-top-color: rgba(148,163,184,0.2) !important;
+}
+.landing-light footer .text-slate-400 { color: #64748b !important; }
+.landing-light footer .text-slate-600 { color: #94a3b8 !important; }
+
+/* ── Toggle button on light ─────────────────────────────────────────────── */
+.landing-light .landing-theme-toggle { /* inherits component styles */ }
+
+/* ── Transition smoothness for all text/bg ───────────────────────────────── */
+.landing-page * {
+  transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease;
+}
