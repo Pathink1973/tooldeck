@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ExternalLink, Heart, CreditCard as Edit, Trash2, Share2, Check } from 'lucide-react';
+import { ExternalLink, Heart, CreditCard as Edit, Trash2, Share2, Check, Bookmark } from 'lucide-react';
 import { CardContent, CardFooter, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { CardCollectionPicker } from '../collections/CardCollectionPicker';
@@ -15,7 +15,7 @@ interface CardItemProps {
 }
 
 export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'grid' }) => {
-  const { toggleFavorite, deleteCard } = useCardStore();
+  const { toggleFavorite, deleteCard, toggleReadLater } = useCardStore();
   const { darkMode } = useThemeStore();
   const [shareCopied, setShareCopied] = useState(false);
 
@@ -23,6 +23,13 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'gr
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(card.id);
+  };
+
+  const handleReadLaterToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleReadLater(card.id);
+    if (!card.read_later) toast.success('Guardado para ler mais tarde', { duration: 1800 });
   };
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -72,6 +79,14 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'gr
   const deleteBtnClass = darkMode
     ? 'text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10'
     : 'text-rose-400 hover:text-rose-600 hover:bg-rose-50';
+
+  const bookmarkBtnClass = (active: boolean) => active
+    ? darkMode
+      ? 'text-sky-400 bg-sky-500/15 border border-sky-400/30'
+      : 'text-sky-500 bg-sky-50 border border-sky-300/50'
+    : darkMode
+      ? 'text-slate-500 hover:text-sky-400 hover:bg-sky-500/10 border border-transparent'
+      : 'text-slate-300 hover:text-sky-500 hover:bg-sky-50 border border-transparent';
 
   const footerBorderClass = darkMode ? 'border-white/[0.07]' : 'border-slate-200/60';
 
@@ -145,6 +160,13 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'gr
               <Button variant="ghost" size="sm" className={`p-1 h-7 w-7 rounded-lg transition-colors ${shareCopied ? (darkMode ? 'text-emerald-400' : 'text-emerald-500') : actionBtnClass}`} onClick={handleShare} title="Compartilhar">
                 {shareCopied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
               </Button>
+              <button
+                onClick={handleReadLaterToggle}
+                className={`p-1.5 rounded-full transition-all duration-200 ${bookmarkBtnClass(card.read_later)}`}
+                title={card.read_later ? 'Remover de ler mais tarde' : 'Ler mais tarde'}
+              >
+                <Bookmark className={`h-3.5 w-3.5 ${card.read_later ? 'fill-current' : ''}`} />
+              </button>
               <Button variant="ghost" size="sm" className={`p-1 h-7 w-7 rounded-lg ${actionBtnClass}`} onClick={handleEdit}><Edit className="h-3.5 w-3.5" /></Button>
               <Button variant="ghost" size="sm" className={`p-1 h-7 w-7 rounded-lg ${deleteBtnClass}`} onClick={handleDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
             </div>
@@ -186,6 +208,13 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'gr
             <Button variant="ghost" size="sm" className={`p-1 h-6 w-6 rounded-md transition-colors ${shareCopied ? (darkMode ? 'text-emerald-400' : 'text-emerald-500') : actionBtnClass}`} onClick={handleShare} title="Compartilhar">
               {shareCopied ? <Check className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
             </Button>
+            <button
+              onClick={handleReadLaterToggle}
+              className={`p-1 rounded-full transition-all duration-200 ${bookmarkBtnClass(card.read_later)}`}
+              title={card.read_later ? 'Remover de ler mais tarde' : 'Ler mais tarde'}
+            >
+              <Bookmark className={`h-3 w-3 ${card.read_later ? 'fill-current' : ''}`} />
+            </button>
             <Button variant="ghost" size="sm" className={`p-1 h-6 w-6 rounded-md ${actionBtnClass}`} onClick={handleEdit}><Edit className="h-3 w-3" /></Button>
             <Button variant="ghost" size="sm" className={`p-1 h-6 w-6 rounded-md ${deleteBtnClass}`} onClick={handleDelete}><Trash2 className="h-3 w-3" /></Button>
           </div>
@@ -225,6 +254,21 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'gr
             }`}
           >
             <Heart className={`h-3.5 w-3.5 ${card.favorite ? 'fill-current' : ''}`} />
+          </button>
+
+          {/* Read later */}
+          <button
+            onClick={handleReadLaterToggle}
+            className={`absolute top-2.5 right-10 p-1.5 rounded-full backdrop-blur-md border transition-all duration-200 shadow-sm ${
+              card.read_later
+                ? 'bg-sky-500/90 border-sky-400/50 text-white shadow-sky-500/30'
+                : darkMode
+                  ? 'bg-black/40 border-white/10 text-slate-300 hover:text-sky-400 hover:bg-black/60 hover:border-sky-400/30'
+                  : 'bg-white/80 border-white/60 text-slate-400 hover:text-sky-500 hover:bg-white/95'
+            }`}
+            title={card.read_later ? 'Remover de ler mais tarde' : 'Ler mais tarde'}
+          >
+            <Bookmark className={`h-3.5 w-3.5 ${card.read_later ? 'fill-current' : ''}`} />
           </button>
         </div>
 

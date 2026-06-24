@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Tag, Heart, X } from 'lucide-react';
+import { Search, Tag, Heart, X, Bookmark } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -7,7 +7,7 @@ import { useCardStore } from '../../store/cardStore';
 import { useThemeStore } from '../../store/themeStore';
 
 export const FilterBar: React.FC = () => {
-  const { cards, filterTags, setFilterTags, setSearchQuery, showFavoritesOnly, toggleFavoritesFilter } = useCardStore();
+  const { cards, filterTags, setFilterTags, setSearchQuery, showFavoritesOnly, toggleFavoritesFilter, showReadLaterOnly, toggleReadLaterFilter } = useCardStore();
   const { darkMode } = useThemeStore();
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [searchInput, setSearchInput] = useState('');
@@ -38,6 +38,7 @@ export const FilterBar: React.FC = () => {
     setSearchQuery('');
   };
 
+  const readLaterCount = cards.filter(c => c.read_later).length;
   const hasActiveFilters = filterTags.length > 0 || searchInput || showFavoritesOnly;
   const displayedTags = showAllTags ? availableTags : availableTags.slice(0, 10);
 
@@ -68,6 +69,31 @@ export const FilterBar: React.FC = () => {
             >
               <Heart className={`h-4 w-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
               <span className="hidden sm:inline">Favoritos</span>
+            </button>
+
+            <button
+              onClick={toggleReadLaterFilter}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-all duration-200 ${
+                showReadLaterOnly
+                  ? 'bg-sky-500 border-sky-500 text-white shadow-sm shadow-sky-500/20'
+                  : darkMode
+                    ? 'border-gray-600 text-gray-400 hover:border-sky-500/50 hover:text-sky-400'
+                    : 'border-gray-200 text-gray-500 hover:border-sky-300 hover:text-sky-500'
+              }`}
+            >
+              <Bookmark className={`h-4 w-4 ${showReadLaterOnly ? 'fill-current' : ''}`} />
+              <span className="hidden sm:inline">Ler mais tarde</span>
+              {readLaterCount > 0 && (
+                <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
+                  showReadLaterOnly
+                    ? 'bg-white/20 text-white'
+                    : darkMode
+                      ? 'bg-sky-500/20 text-sky-300'
+                      : 'bg-sky-100 text-sky-600'
+                }`}>
+                  {readLaterCount}
+                </span>
+              )}
             </button>
 
             {hasActiveFilters && (

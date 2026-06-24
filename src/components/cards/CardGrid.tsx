@@ -7,7 +7,7 @@ import { CardEditModal } from './CardEditModal';
 import { useThemeStore } from '../../store/themeStore';
 
 export const CardGrid: React.FC = () => {
-  const { cards, loading, error, fetchCards, filterTags, searchQuery, showFavoritesOnly, viewMode } = useCardStore();
+  const { cards, loading, error, fetchCards, filterTags, searchQuery, showFavoritesOnly, showReadLaterOnly, viewMode } = useCardStore();
   const { activeCollectionId } = useCollectionStore();
   const [editingCard, setEditingCard] = useState<Card | null>(null);
   const [collectionCardIds, setCollectionCardIds] = useState<Set<string> | null>(null);
@@ -35,6 +35,7 @@ export const CardGrid: React.FC = () => {
   const filteredCards = cards.filter(card => {
     if (collectionCardIds !== null && !collectionCardIds.has(card.id)) return false;
     if (showFavoritesOnly && !card.favorite) return false;
+    if (showReadLaterOnly && !card.read_later) return false;
     if (filterTags.length > 0 && !filterTags.some(tag => card.tags.includes(tag))) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -68,7 +69,7 @@ export const CardGrid: React.FC = () => {
     return (
       <div className={`text-center py-16 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
         <p className="text-lg font-medium">Nenhum cartão encontrado.</p>
-        {(filterTags.length > 0 || searchQuery || showFavoritesOnly || activeCollectionId) && (
+        {(filterTags.length > 0 || searchQuery || showFavoritesOnly || showReadLaterOnly || activeCollectionId) && (
           <p className="mt-2 text-sm">Tente ajustar os seus filtros de busca.</p>
         )}
       </div>

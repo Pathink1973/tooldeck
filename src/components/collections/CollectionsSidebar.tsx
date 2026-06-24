@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, FolderOpen, Trash2, Pencil, Check, X, Loader2, ChevronDown, ChevronUp, Layers } from 'lucide-react';
+import { Plus, FolderOpen, Trash2, Pencil, Check, X, Loader2, ChevronDown, ChevronUp, Layers, Bookmark } from 'lucide-react';
 import { useCollectionStore, type Collection } from '../../store/collectionStore';
+import { useCardStore } from '../../store/cardStore';
 import { useThemeStore } from '../../store/themeStore';
 import toast from 'react-hot-toast';
 
@@ -14,6 +15,7 @@ export const CollectionsSidebar: React.FC = () => {
     collections, activeCollectionId, loading,
     fetchCollections, createCollection, updateCollection, deleteCollection, setActiveCollection,
   } = useCollectionStore();
+  const { cards, showReadLaterOnly, toggleReadLaterFilter } = useCardStore();
   const { darkMode } = useThemeStore();
 
   const [expanded, setExpanded] = useState(true);
@@ -82,6 +84,7 @@ export const CollectionsSidebar: React.FC = () => {
   };
 
   const dm = darkMode;
+  const readLaterCount = cards.filter(c => c.read_later).length;
   const activeCount = activeCollectionId
     ? collections.find(c => c.id === activeCollectionId)?.name
     : 'Todos os cartões';
@@ -185,11 +188,31 @@ export const CollectionsSidebar: React.FC = () => {
 
           {/* Scrollable pill row */}
           <div className="px-3 pb-3 pt-2 flex gap-2 overflow-x-auto scrollbar-hide flex-nowrap">
+            {/* Read later pill */}
+            <button
+              onClick={() => { toggleReadLaterFilter(); setActiveCollection(null); }}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 whitespace-nowrap border ${
+                showReadLaterOnly
+                  ? 'bg-sky-500 text-white border-sky-500 shadow-sm shadow-sky-500/20'
+                  : dm ? 'text-gray-400 border-gray-600 hover:bg-gray-700/60 hover:text-white' : 'text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-900'
+              }`}
+            >
+              <Bookmark className={`h-3.5 w-3.5 ${showReadLaterOnly ? 'fill-current' : ''}`} />
+              Ler mais tarde
+              {readLaterCount > 0 && (
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                  showReadLaterOnly ? 'bg-white/20 text-white' : dm ? 'bg-sky-500/20 text-sky-300' : 'bg-sky-100 text-sky-600'
+                }`}>
+                  {readLaterCount}
+                </span>
+              )}
+            </button>
+
             {/* All cards pill */}
             <button
               onClick={() => setActiveCollection(null)}
               className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 whitespace-nowrap border ${
-                activeCollectionId === null
+                activeCollectionId === null && !showReadLaterOnly
                   ? dm ? 'bg-gray-700 text-white border-gray-600' : 'bg-gray-900 text-white border-gray-900'
                   : dm ? 'text-gray-400 border-gray-600 hover:bg-gray-700/60 hover:text-white' : 'text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-900'
               }`}
