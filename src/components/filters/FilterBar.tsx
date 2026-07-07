@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Tag, Heart, X, Bookmark } from 'lucide-react';
 import { Input } from '../ui/Input';
-import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
 import { useCardStore } from '../../store/cardStore';
 import { useThemeStore } from '../../store/themeStore';
 

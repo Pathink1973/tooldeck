@@ -10,17 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hugeicons/core-free-icons": "^4.2.2",
+    "@hugeicons/react": "^1.1.9",
     "@supabase/supabase-js": "^2.39.7",
+    "cloudinary": "^2.0.3",
+    "clsx": "^2.1.0",
     "lucide-react": "^0.344.0",
+    "openai": "^4.28.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.22.3",
-    "openai": "^4.28.0",
     "react-hot-toast": "^2.4.1",
-    "zustand": "^4.5.2",
-    "clsx": "^2.1.0",
+    "react-router-dom": "^6.22.3",
     "tailwind-merge": "^2.2.1",
-    "cloudinary": "^2.0.3"
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

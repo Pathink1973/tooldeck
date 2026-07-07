@@ -3,7 +3,8 @@ import { ExternalLink, Heart, CreditCard as Edit, Trash2, Share2, Check, Bookmar
 import { CardContent, CardFooter, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { CardCollectionPicker } from '../collections/CardCollectionPicker';
-import { formatDate, extractDomain, generatePlaceholderImage } from '../../lib/utils';
+import { CardIconBadge } from './CardIconBadge';
+import { formatDate, extractDomain } from '../../lib/utils';
 import { useCardStore, type Card as CardType } from '../../store/cardStore';
 import { useThemeStore } from '../../store/themeStore';
 import toast from 'react-hot-toast';
@@ -41,7 +42,7 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'gr
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (window.confirm('Tem certeza que deseja excluir este cartão?')) {
+    if (window.confirm('Tem certeza que deseja excluir este cartao?')) {
       await deleteCard(card.id);
     }
   };
@@ -54,7 +55,7 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'gr
       try {
         await navigator.share({ title: card.title, text: card.description, url: card.link_url });
       } catch {
-        // user dismissed the share sheet — no action needed
+        // user dismissed
       }
       return;
     }
@@ -65,7 +66,6 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'gr
       toast.success('Link copiado!', { duration: 2000 });
       setTimeout(() => setShareCopied(false), 2000);
     } catch {
-      // clipboard not available — fall back to mailto
       window.location.href = `mailto:?subject=${encodeURIComponent(card.title)}&body=${encodeURIComponent(card.link_url)}`;
     }
   };
@@ -122,23 +122,29 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'gr
           style={{ background: 'radial-gradient(circle, rgba(56,189,248,0.5) 0%, transparent 70%)' }}
         />
         <div className="relative w-full sm:w-44 h-36 sm:h-auto overflow-hidden shrink-0">
-          <img
-            src={card.image_url || generatePlaceholderImage(card.title)}
-            alt={card.title}
-            className="w-full h-full object-cover transition-transform duration-500"
-            onError={(e) => { (e.target as HTMLImageElement).src = generatePlaceholderImage(card.title); }}
-          />
+          {card.image_url ? (
+            <img
+              src={card.image_url}
+              alt={card.title}
+              className="w-full h-full object-cover transition-transform duration-500"
+            />
+          ) : (
+            <CardIconBadge iconKey={card.icon_key} size="lg" />
+          )}
           <div className={`absolute inset-y-0 right-0 w-8 hidden sm:block ${darkMode ? 'bg-gradient-to-r from-transparent to-[#0c111c]/60' : 'bg-gradient-to-r from-transparent to-white/30'}`} />
         </div>
         <div className="flex-1 flex flex-col p-4 min-w-0">
           <div className="flex justify-between items-start mb-1.5">
-            <div className="min-w-0 pr-2">
-              <h3 className={`text-base font-semibold line-clamp-1 ${darkMode ? 'text-slate-100' : 'text-slate-800'}`}>
-                {card.title}
-              </h3>
-              <div className={`text-xs flex items-center mt-0.5 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                <ExternalLink className="h-3 w-3 mr-1 shrink-0" />
-                <span className="truncate">{extractDomain(card.link_url)}</span>
+            <div className="flex items-center gap-2.5 min-w-0 pr-2">
+              {card.image_url && <CardIconBadge iconKey={card.icon_key} size="sm" />}
+              <div className="min-w-0">
+                <h3 className={`text-base font-semibold line-clamp-1 ${darkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+                  {card.title}
+                </h3>
+                <div className={`text-xs flex items-center mt-0.5 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                  <ExternalLink className="h-3 w-3 mr-1 shrink-0" />
+                  <span className="truncate">{extractDomain(card.link_url)}</span>
+                </div>
               </div>
             </div>
             {favBtn()}
@@ -186,15 +192,20 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'gr
         />
         <a href={card.link_url} target="_blank" rel="noopener noreferrer" className="block">
           <div className="p-3.5">
-            <div className="flex justify-between items-start mb-1.5">
-              <h3 className={`text-sm font-semibold line-clamp-2 pr-2 ${darkMode ? 'text-slate-100' : 'text-slate-800'}`}>{card.title}</h3>
-              {favBtn('sm')}
+            <div className="flex items-start gap-2.5 mb-1.5">
+              <CardIconBadge iconKey={card.icon_key} size="sm" />
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start">
+                  <h3 className={`text-sm font-semibold line-clamp-2 pr-2 ${darkMode ? 'text-slate-100' : 'text-slate-800'}`}>{card.title}</h3>
+                  {favBtn('sm')}
+                </div>
+                <div className={`text-xs flex items-center mt-0.5 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                  <ExternalLink className="h-3 w-3 mr-1 shrink-0" />
+                  <span className="truncate">{extractDomain(card.link_url)}</span>
+                </div>
+              </div>
             </div>
-            <div className={`text-xs flex items-center mb-2.5 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-              <ExternalLink className="h-3 w-3 mr-1 shrink-0" />
-              <span className="truncate">{extractDomain(card.link_url)}</span>
-            </div>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 mt-2">
               {card.tags.slice(0, 2).map((tag, index) => (
                 <span key={index} className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${tagClass}`}>{tag}</span>
               ))}
@@ -232,15 +243,25 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit, viewMode = 'gr
       />
 
       <a href={card.link_url} target="_blank" rel="noopener noreferrer" className="flex-grow flex flex-col">
-        {/* Image */}
+        {/* Image / Icon area */}
         <div className="relative h-40 overflow-hidden">
-          <img
-            src={card.image_url || generatePlaceholderImage(card.title)}
-            alt={card.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            onError={(e) => { (e.target as HTMLImageElement).src = generatePlaceholderImage(card.title); }}
-          />
+          {card.image_url ? (
+            <img
+              src={card.image_url}
+              alt={card.title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <CardIconBadge iconKey={card.icon_key} size="lg" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+
+          {/* Icon badge (always visible over image) */}
+          {card.image_url && (
+            <div className="absolute bottom-2.5 left-2.5">
+              <CardIconBadge iconKey={card.icon_key} size="md" />
+            </div>
+          )}
 
           {/* Favourite */}
           <button

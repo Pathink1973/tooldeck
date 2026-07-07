@@ -7,6 +7,17 @@ const corsHeaders = {
     "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
+const VALID_ICON_KEYS = [
+  "dev", "ai", "genai", "design", "illustration", "photo", "image",
+  "finance", "banking", "wallet", "security", "privacy", "music", "audio",
+  "video", "gaming", "productivity", "marketing", "ecommerce", "education",
+  "reading", "fitness", "health", "analytics", "data", "cloud",
+  "communication", "email", "hardware", "mobile", "layers", "science",
+  "physics", "microscopy", "travel", "explore", "calendar", "tools", "api",
+  "chip", "robot", "charts", "reporting", "plugin", "gift", "search",
+  "magic", "web", "link",
+];
+
 async function fetchPageContext(url: string): Promise<string> {
   try {
     const controller = new AbortController();
@@ -72,6 +83,7 @@ Deno.serve(async (req: Request) => {
           error: "OPENAI_API_KEY not configured",
           description: "Recurso web guardado",
           tags: ["sem-tag"],
+          icon_key: "web",
         }),
         {
           status: 500,
@@ -91,8 +103,9 @@ ${imageUrl ? `Image URL: ${imageUrl}` : ""}
 Provide:
 1. A concise description in Portuguese (max 150 characters) of what this tool or resource is about
 2. A list of 3-5 relevant tags (single words or short phrases, in Portuguese when appropriate)
+3. An icon_key from this list that best represents the category of this resource: ${VALID_ICON_KEYS.join(", ")}
 
-Respond ONLY with valid JSON: {"description": "...", "tags": ["...", "..."]}`;
+Respond ONLY with valid JSON: {"description": "...", "tags": ["...", "..."], "icon_key": "..."}`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -106,7 +119,7 @@ Respond ONLY with valid JSON: {"description": "...", "tags": ["...", "..."]}`;
           {
             role: "system",
             content:
-              "You are an AI that analyzes web resources and provides concise descriptions and relevant tags. Always respond with valid JSON only.",
+              "You are an AI that analyzes web resources and provides concise descriptions, relevant tags, and categorizes them with an icon_key. Always respond with valid JSON only.",
           },
           { role: "user", content: prompt },
         ],
@@ -122,6 +135,7 @@ Respond ONLY with valid JSON: {"description": "...", "tags": ["...", "..."]}`;
         JSON.stringify({
           description: "Recurso web guardado",
           tags: ["sem-tag"],
+          icon_key: "web",
           _error: `OpenAI ${response.status}`,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -134,12 +148,17 @@ Respond ONLY with valid JSON: {"description": "...", "tags": ["...", "..."]}`;
 
     const parsed = JSON.parse(content);
 
+    const iconKey = VALID_ICON_KEYS.includes(parsed.icon_key)
+      ? parsed.icon_key
+      : "web";
+
     return new Response(
       JSON.stringify({
         description: parsed.description || "Recurso web guardado",
         tags: Array.isArray(parsed.tags) && parsed.tags.length > 0
           ? parsed.tags
           : ["sem-tag"],
+        icon_key: iconKey,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
@@ -149,6 +168,7 @@ Respond ONLY with valid JSON: {"description": "...", "tags": ["...", "..."]}`;
       JSON.stringify({
         description: "Recurso web guardado",
         tags: ["sem-tag"],
+        icon_key: "web",
         _error: error?.message || "Unknown error",
       }),
       {

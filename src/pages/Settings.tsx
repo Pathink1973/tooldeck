@@ -1,12 +1,21 @@
-import React, { useState } from 'react';
-import { Moon, Sun, HelpCircle, X } from 'lucide-react';
+import { useState } from 'react';
+import { Moon, Sun, HelpCircle, X, RefreshCw } from 'lucide-react';
 import { Toggle } from '../components/ui/Toggle';
 import { Button } from '../components/ui/Button';
 import { useThemeStore } from '../store/themeStore';
+import { useCardStore } from '../store/cardStore';
 
 export const Settings = () => {
   const { darkMode, toggleDarkMode } = useThemeStore();
+  const { reprocessIcons } = useCardStore();
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [reprocessing, setReprocessing] = useState(false);
+
+  const handleReprocess = async () => {
+    setReprocessing(true);
+    await reprocessIcons();
+    setReprocessing(false);
+  };
 
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-[#F9FAFB]'}`}>
@@ -35,6 +44,22 @@ export const Settings = () => {
                   <span className="sr-only">Toggle dark mode</span>
                 </Toggle>
               </div>
+            </div>
+
+            <div className={`pt-6 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+              <h2 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : ''}`}>Icones dos Cards</h2>
+              <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                Atribuir icones tematicos aos cards existentes com base nas suas tags e titulo.
+              </p>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleReprocess}
+                isLoading={reprocessing}
+                leftIcon={<RefreshCw className="h-4 w-4" />}
+              >
+                Reprocessar Icones
+              </Button>
             </div>
 
             <div className={`pt-6 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>

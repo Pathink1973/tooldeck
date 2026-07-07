@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
-import { generateDescriptionAndTags } from '../lib/openai';
+import { generateCardMetadata } from '../lib/openai';
+import { inferIconKey } from '../lib/iconMap';
 
 const READ_LATER_TAG = '__read_later__';
+const ICON_TAG_PREFIX = '__icon:';
 
 export interface Card {
   id: string;
@@ -15,6 +17,7 @@ export interface Card {
   tags: string[];
   favorite: boolean;
   read_later: boolean;
+  icon_key: string;
   created_at: string;
 }
 
@@ -32,10 +35,14 @@ interface RawCard {
 
 function rawToCard(raw: RawCard): Card {
   const hasReadLater = raw.tags.includes(READ_LATER_TAG);
+  const iconTag = raw.tags.find(t => t.startsWith(ICON_TAG_PREFIX));
+  const iconKey = iconTag ? iconTag.slice(ICON_TAG_PREFIX.length, -2) : '';
+
   return {
     ...raw,
-    tags: raw.tags.filter(t => t !== READ_LATER_TAG),
+    tags: raw.tags.filter(t => t !== READ_LATER_TAG && !t.startsWith(ICON_TAG_PREFIX)),
     read_later: hasReadLater,
+    icon_key: iconKey || inferIconKey(raw.tags.filter(t => !t.startsWith('__')), raw.title),
   };
 }
 
@@ -50,7 +57,7 @@ interface CardState {
   showReadLaterOnly: boolean;
 
   fetchCards: () => Promise<void>;
-  addCard: (card: Omit<Card, 'id' | 'created_at' | 'read_later'>) => Promise<Card | null>;
+  addCard: (card: Omit<Card, 'id' | 'created_at' | 'read_later' | 'icon_key'> & { icon_key?: string }) => Promise<Card | null>;
   updateCard: (id: string, updates: Partial<Card>) => Promise<void>;
   deleteCard: (id: string) => Promise<void>;
   toggleFavorite: (id: string) => Promise<void>;
@@ -63,6 +70,7 @@ interface CardState {
   toggleReadLaterFilter: () => void;
 
   processNewCard: (url: string, imageUrl?: string) => Promise<Card | null>;
+  reprocessIcons: () => Promise<void>;
 }
 
 export const useCardStore = create<CardState>((set, get) => ({
@@ -96,9 +104,18 @@ export const useCardStore = create<CardState>((set, get) => ({
   addCard: async (card) => {
     try {
       set({ loading: true, error: null });
+
+      const dbTags = [...card.tags];
+      if (card.icon_key) {
+        dbTags.push(`${ICON_TAG_PREFIX}${card.icon_key}__`);
+      }
+
+      const { icon_key: _, ...rest } = card as any;
+      const dbCard = { ...rest, tags: dbTags };
+
       const { data, error } = await supabase
         .from('cards')
-        .insert([card])
+        .insert([dbCard])
         .select('id, user_id, title, description, image_url, link_url, tags, favorite, created_at')
         .single();
 
@@ -118,7 +135,7 @@ export const useCardStore = create<CardState>((set, get) => ({
   },
 
   updateCard: async (id, updates) => {
-    const { read_later, ...dbUpdates } = updates as any;
+    const { read_later: _, icon_key: _ik, ...dbUpdates } = updates as any;
     try {
       set({ loading: true, error: null });
       const { error } = await supabase.from('cards').update(dbUpdates).eq('id', id);
@@ -179,11 +196,18 @@ export const useCardStore = create<CardState>((set, get) => ({
     if (!card) return;
 
     const newStatus = !card.read_later;
-    const currentDbTags = newStatus
-      ? [...card.tags, READ_LATER_TAG]
-      : card.tags.filter(t => t !== READ_LATER_TAG);
 
-    // Optimistic update
+    const { data } = await supabase
+      .from('cards')
+      .select('tags')
+      .eq('id', id)
+      .single();
+
+    const currentDbTags: string[] = data?.tags ?? [];
+    const updatedTags = newStatus
+      ? [...currentDbTags, READ_LATER_TAG]
+      : currentDbTags.filter(t => t !== READ_LATER_TAG);
+
     set(state => ({
       cards: state.cards.map(c => c.id === id ? { ...c, read_later: newStatus } : c),
     }));
@@ -191,15 +215,54 @@ export const useCardStore = create<CardState>((set, get) => ({
     try {
       const { error } = await supabase
         .from('cards')
-        .update({ tags: currentDbTags })
+        .update({ tags: updatedTags })
         .eq('id', id);
       if (error) throw error;
-    } catch (error: any) {
-      // Revert on failure
+    } catch {
       set(state => ({
         cards: state.cards.map(c => c.id === id ? { ...c, read_later: !newStatus } : c),
       }));
       toast.error('Erro ao guardar para ler mais tarde');
+    }
+  },
+
+  reprocessIcons: async () => {
+    const cards = get().cards;
+    const toProcess = cards.filter(c => !c.icon_key || c.icon_key === 'web');
+
+    let processed = 0;
+    for (const card of toProcess) {
+      const newIconKey = inferIconKey(card.tags, card.title);
+      if (newIconKey === 'web') continue;
+
+      const { data } = await supabase
+        .from('cards')
+        .select('tags')
+        .eq('id', card.id)
+        .single();
+
+      if (!data) continue;
+
+      const dbTags: string[] = data.tags.filter((t: string) => !t.startsWith(ICON_TAG_PREFIX));
+      dbTags.push(`${ICON_TAG_PREFIX}${newIconKey}__`);
+
+      const { error } = await supabase
+        .from('cards')
+        .update({ tags: dbTags })
+        .eq('id', card.id);
+
+      if (!error) {
+        processed++;
+        set(state => ({
+          cards: state.cards.map(c => c.id === card.id ? { ...c, icon_key: newIconKey } : c),
+        }));
+      }
+    }
+
+    if (processed > 0) {
+      toast.success(`${processed} icone(s) actualizados`);
+    } else {
+      toast.success('Todos os cards ja tem icones adequados');
     }
   },
 
@@ -213,7 +276,7 @@ export const useCardStore = create<CardState>((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      const { description, tags } = await generateDescriptionAndTags(url, imageUrl);
+      const { description, tags, icon_key } = await generateCardMetadata(url, imageUrl);
 
       const urlObj = new URL(url);
       const domain = urlObj.hostname.replace('www.', '');
@@ -231,6 +294,7 @@ export const useCardStore = create<CardState>((set, get) => ({
         link_url: url,
         tags,
         favorite: false,
+        icon_key,
       };
 
       const card = await get().addCard(newCard);
